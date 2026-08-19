@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLUB 90s Community</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#170f24;
+    --bg-alt:#241736;
+    --bg-card:#1e1330;
+    --magenta:#ff2e88;
+    --cyan:#00e5ff;
+    --yellow:#ffd23f;
+    --cream:#f5efe0;
+    --muted:#a394c2;
+    --grid:rgba(0,229,255,0.12);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(255,46,136,0.18), transparent 45%),
+      radial-gradient(ellipse at 90% 0%, rgba(0,229,255,0.14), transparent 40%),
+      var(--bg);
+    color:var(--cream);
+    font-family:'Space Grotesk', sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .pixel{font-family:'Press Start 2P', monospace;}
+  .mono{font-family:'VT323', monospace;}
+
+  .scanlines{
+    pointer-events:none;
+    position:fixed; inset:0; z-index:50;
+    background:repeating-linear-gradient(
+      to bottom, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px,
+      transparent 2px, transparent 4px
+    );
+    mix-blend-mode:overlay;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:64px 24px 48px;
+    text-align:center;
+    border-bottom:2px solid var(--grid);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:36px 36px;
+  }
+  .hero::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(to bottom, transparent 60%, var(--bg) 100%);
+    pointer-events:none;
+  }
+  .eyebrow{ font-size:11px; letter-spacing:.15em; color:var(--yellow); margin-bottom:18px; animation:blink 1.4s steps(1) infinite; }
+  @keyframes blink{ 50%{opacity:.25;} }
+  .hero h1{
+    font-size:clamp(28px, 7vw, 58px); line-height:1.35; margin:0 0 18px; color:var(--cream);
+    text-shadow:3px 3px 0 var(--magenta), 6px 6px 0 rgba(0,229,255,0.55);
+    letter-spacing:1px;
+  }
+  .hero p{ max-width:520px; margin:0 auto; color:var(--muted); font-size:16px; line-height:1.6; }
+  .insert-coin{
+    display:inline-block; margin-top:28px; padding:12px 22px; font-size:13px;
+    color:var(--bg); background:var(--cyan); box-shadow:4px 4px 0 var(--magenta);
+    text-decoration:none; cursor:pointer; border:none; transition:transform .12s ease;
+  }
+  .insert-coin:hover{ transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--magenta); }
+  .insert-coin:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--magenta); }
+
+  /* ---------- NAV ---------- */
+  .tabs{
+    position:sticky; top:0; z-index:40; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
+    padding:16px; background:rgba(23,15,36,0.92); backdrop-filter:blur(6px); border-bottom:2px solid var(--grid);
+  }
+  .tab{
+    font-family:'VT323', monospace; font-size:20px; letter-spacing:.05em; color:var(--muted);
+    background:var(--bg-alt); border:2px solid transparent; padding:8px 20px 6px; cursor:pointer; border-radius:2px;
+  }
+  .tab.active{ color:var(--bg); background:var(--yellow); }
+  .tab:hover:not(.active){ border-color:var(--cyan); color:var(--cream); }
+
+  main{ max-width:980px; margin:0 auto; padding:48px 20px 100px; }
+  section{ display:none; }
+  section.active{ display:block; animation:fadein .3s ease; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .section-title{ font-size:14px; color:var(--yellow); margin-bottom:6px; display:flex; align-items:center; gap:10px; }
+  .section-title::after{ content:""; flex:1; height:2px; background:var(--grid); }
+  .section-sub{ color:var(--muted); margin:0 0 28px; font-size:15px; }
+
+  /* ---------- INFO CAROUSEL ---------- */
+  .carousel-wrap{ position:relative; }
+  .carousel{
+    display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:16px;
+    padding-bottom:6px; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+  }
+  .carousel::-webkit-scrollbar{ display:none; }
+  .info-card{
+    scroll-snap-align:center; flex:0 0 100%; min-width:100%;
+    background:var(--bg-card); border:1px solid var(--grid); border-top:4px solid var(--magenta);
+    border-radius:8px; padding:34px 28px; text-align:center;
+    box-shadow:0 0 30px rgba(255,46,136,0.08);
+  }
+  .info-icon{ font-size:38px; margin-bottom:16px; }
+  .info-card h3{ font-size:17px; line-height:1.6; margin:0 0 14px; color:var(--yellow); letter-spacing:.03em; }
+  .info-card p{ color:var(--muted); font-size:15px; line-height:1.6; margin:0; max-width:440px; margin:0 auto; }
+  .carousel-nav{ display:flex; justify-content:center; align-items:center; gap:14px; margin-top:18px; }
+  .carousel-arrow{
+    background:var(--bg-alt); border:1px solid var(--grid); color:var(--cream);
+    width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:16px; line-height:1;
+  }
+  .carousel-arrow:hover{ border-color:var(--cyan); color:var(--cyan); }
+  .dots{ display:flex; gap:8px; }
+  .dot{ width:8px; height:8px; border-radius:50%; background:var(--grid); border:none; cursor:pointer; padding:0; }
+  .dot.active{ background:var(--yellow); }
+  .swipe-hint{ text-align:center; color:var(--muted); font-size:12px; margin-top:10px; letter-spacing:.08em; }
+
+  /* ---------- ANGGOTA ---------- */
+  .roster-toolbar{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+  .roster-count{ font-family:'VT323', monospace; font-size:18px; color:var(--muted); }
+  .search-box{
+    font-family:'VT323', monospace; font-size:18px; background:var(--bg-card); border:1px solid var(--grid);
+    color:var(--cream); padding:8px 14px; border-radius:4px; min-width:220px;
+  }
+  .search-box:focus{ outline:2px solid var(--cyan); outline-offset:1px; border-color:var(--cyan); }
+  .table-wrap{ overflow-x:auto; border:1px solid var(--grid); border-radius:6px; }
+  table.roster-table{ width:100%; border-collapse:collapse; min-width:720px; font-size:14px; }
+  .roster-table thead th{
+    font-family:'VT323', monospace; font-size:16px; letter-spacing:.05em; text-align:left; color:var(--yellow);
+    background:var(--bg-alt); padding:10px 14px; position:sticky; top:0; border-bottom:2px solid var(--grid);
+  }
+  .roster-table tbody td{ padding:9px 14px; border-bottom:1px solid rgba(0,229,255,0.08); color:var(--cream); }
+  .roster-table tbody tr:hover{ background:rgba(0,229,255,0.05); }
+  .roster-table td.nick{ font-family:'VT323', monospace; font-size:17px; color:var(--cyan); }
+  
+  /* BADGES */
+  .badge{
+    font-family:'VT323', monospace; font-size:13px; padding:2px 9px; border-radius:3px; display:inline-block;
+    white-space:nowrap;
+  }
+  /* Jabatan Badge */
+  .badge.captain{ background:var(--yellow); color:var(--bg); }
+  .badge.wakil{ background:var(--magenta); color:var(--cream); }
+  .badge.senior{ background:var(--cyan); color:var(--bg); }
+  .badge.member{ background:#ffffff; color:#000000; border:1px solid var(--grid); }
+  .badge.new{ background:var(--bg-alt); color:var(--muted); border:1px solid var(--grid); }
+  
+  /* Role Badge Party */
+  .badge.dps{ background:var(--magenta); color:var(--cream); }
+  .badge.subdps{ background:var(--yellow); color:var(--bg); }
+  .badge.parry{ background:var(--cyan); color:var(--bg); }
+
+  /* ---------- PARTY ---------- */
+  .party-info{
+    background:var(--bg-card); border:1px solid var(--grid); border-left:4px solid var(--cyan);
+    border-radius:6px; padding:16px 18px; margin-bottom:26px; color:var(--muted); font-size:14px; line-height:1.6;
+  }
+  .party-info strong{ color:var(--cream); }
+  .party-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(240px,1fr)); gap:16px; }
+  .party-card{ background:var(--bg-card); border:1px solid var(--grid); border-radius:6px; padding:16px 18px; }
+  .party-card h4{
+    margin:0 0 12px; font-family:'VT323', monospace; font-size:20px; color:var(--yellow);
+    display:flex; align-items:center; gap:8px;
+  }
+  .party-card h4::before{ content:"◆"; color:var(--magenta); font-size:12px; }
+  .party-member{ display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed rgba(0,229,255,0.1); font-size:14px; }
+  .party-member:last-child{ border-bottom:none; }
+  .party-member .pnick{ font-family:'VT323', monospace; font-size:16px; color:var(--cream); }
+  .party-card.incomplete{ border-left:3px dashed var(--muted); }
+
+  .empty{
+    color:var(--muted); font-family:'VT323', monospace; font-size:18px; padding:24px; text-align:center;
+    border:1px dashed var(--grid); border-radius:6px;
+  }
+
+  footer{ text-align:center; padding:30px 20px 50px; color:var(--muted); font-size:12px; letter-spacing:.05em; }
+  .cursor{ display:inline-block; width:8px; background:var(--cyan); animation:blink .8s steps(1) infinite; }
+
+  /* ---------- TOP BAR (judul + logo) ---------- */
+  .topbar{
+    display:flex; align-items:center; gap:14px;
+    padding:14px 24px;
+    border-bottom:2px solid var(--grid);
+    background:rgba(23,15,36,0.6);
+  }
+  .guild-logo{
+    width:48px; height:48px; border-radius:10px; flex-shrink:0;
+    box-shadow:0 0 0 2px var(--grid), 0 0 16px rgba(255,46,136,0.25);
+    object-fit:cover;
+  }
+  .topbar-title{
+    font-size:clamp(12px, 3.2vw, 17px);
+    letter-spacing:.03em;
+    color:var(--cream);
+    line-height:1.4;
+  }
+
+  @media (max-width:560px){
+    .roster-toolbar{ flex-direction:column; align-items:stretch; }
+    .search-box{ min-width:0; }
+  }
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+
+<div class="scanlines"></div>
+
+<header class="topbar">
+  <!-- GANTI src DI BAWAH INI KALAU LOGO GUILD ASLI SUDAH ADA -->
+  <img class="guild-logo" id="guild-logo" src="logo-placeholder.svg" alt="Logo CLUB 90s">
+  <span class="topbar-title pixel">CLUB 90s COMMUNITY</span>
+</header>
+
+<section class="hero">
+  <div class="eyebrow pixel">&gt; INSERT COIN TO CONTINUE_</div>
+  <h1 class="pixel">CLUB 90s<br>COMMUNITY</h1>
+  <p>Markas guild kita. Info penting, daftar anggota, sama party tetap — semua ada di sini.</p>
+  <button class="insert-coin pixel" onclick="document.getElementById('info-tab').click(); window.scrollTo({top: document.getElementById('tabs').offsetTop, behavior:'smooth'})">PRESS START</button>
+</section>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-target="info" id="info-tab">📢 INFO</button>
+  <button class="tab" data-target="anggota" id="anggota-tab">🎮 ANGGOTA</button>
+  <button class="tab" data-target="party" id="party-tab">🎉 PARTY</button>
+</nav>
+
+<main>
+
+  <!-- INFO -->
+  <section id="info" class="active">
+    <div class="section-title pixel">INFO</div>
+    <p class="section-sub">Geser ke kiri / kanan buat lihat info lainnya.</p>
+
+    <div class="carousel-wrap">
+      <div class="carousel" id="info-carousel"></div>
+      <div class="carousel-nav">
+        <button class="carousel-arrow" id="info-prev" aria-label="Sebelumnya">‹</button>
+        <div class="dots" id="info-dots"></div>
+        <button class="carousel-arrow" id="info-next" aria-label="Selanjutnya">›</button>
+      </div>
+      <div class="swipe-hint mono">← SWIPE →</div>
+    </div>
+  </section>
+
+  <!-- ANGGOTA -->
+  <section id="anggota">
+    <div class="section-title pixel">ANGGOTA</div>
+    <p class="section-sub">Daftar seluruh anggota guild CLUB 90s.</p>
+
+    <div class="roster-toolbar">
+      <div class="roster-count mono" id="roster-count"></div>
+      <input type="text" class="search-box" id="roster-search" placeholder="Cari nickname / nama / jabatan...">
+    </div>
+
+    <div class="table-wrap">
+      <table class="roster-table">
+        <thead>
+          <tr><th>NO</th><th>NICKNAME</th><th>NAMA ASLI</th><th>UID</th><th>NO WHATSAPP</th><th>JABATAN</th></tr>
+        </thead>
+        <tbody id="roster-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PARTY -->
+  <section id="party">
+    <div class="section-title pixel">PARTY</div>
+    <p class="section-sub">Party tetap guild — 1 party diisi 3 orang dengan role masing-masing.</p>
+
+    <div class="party-info">
+      Ini adalah <strong>list party tetap</strong>. Nama party, nomor anggota, dan rolenya kirim ke
+      <strong>GROUP</strong> Whatsapp.
+    </div>
+
+    <div class="party-grid" id="party-grid"></div>
+  </section>
+
+</main>
+
+<footer class="mono">CLUB 90s COMMUNITY — data diatur langsung dari script<span class="cursor">&nbsp;</span></footer>
+
+<script>
+(function(){
+
+  /* =========================================================
+     EDIT DATA DI BAWAH INI LANGSUNG DARI SCRIPT
+     ========================================================= */
+
+  // ---- INFO: tambah/ubah/hapus objek di array ini ----
+  const INFO_LIST = [
+    {
+      icon: "⚔️",
+      title: "JANGAN LUPA SERANG GUILD CHALLANGE",
+      body: "Pastikan semua anggota nyerang guild boss sebelum reset harian. Jangan sampai jatah serangan kebuang percuma."
+    },
+    {
+      icon: "💰",
+      title: "JANGAN LUPA DONASI",
+      body: "Donasi guild rutin ya. 10.000 Gold tidak akan membuatmu miskin xixixi"
+    },
+    {
+      icon: "🔐",
+      title: "RULES GUILD",
+      body: "DMG GC MINGGUAN WAJIB DIATAS 2B, POIN KONTRIBUSI GUILD WAJIB 840."
+    }
+  ];
+
+  // ---- ANGGOTA: tambah/ubah/hapus objek di array ini ----
+  const MEMBERS = [
+    { no:1, nickname:"90s Callysta", nama:"Andi", uid:"-", wa:"082 343 935 635", jabatan:"CAPTAIN" },
+    { no:2, nickname:"90s Mulyono", nama:"Aldi", uid:"-", wa:"081 527 890 559", jabatan:"WAKIL CAPTAIN" },
+    { no:3, nickname:"Player302238580", nama:"Ari", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:4, nickname:"Kagami", nama:"Raya", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:5, nickname:"Akira", nama:"Akriel", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:6, nickname:"90s Brightz", nama:"Gerald", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:7, nickname:"DEM", nama:"David", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:8, nickname:"Adam_91", nama:"Adam", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:9, nickname:"Tenka<3", nama:"Opik", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:10, nickname:"Mithty", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:11, nickname:"Kylo", nama:"Rzq", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:12, nickname:"Notnow", nama:"Primas", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:13, nickname:"Poo", nama:"Dhyy", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:14, nickname:"Lumiere", nama:"Tashriq", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:15, nickname:"NEO", nama:"N", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:16, nickname:"Lia", nama:"Lia", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:17, nickname:"Idz", nama:"Juwita Simanjuntak", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:18, nickname:"Ultio", nama:"Rama", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:19, nickname:"NIPUNEGORO", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:20, nickname:"90s Nightz", nama:"Gerald", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:21, nickname:"Player303067139", nama:"Primas", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:22, nickname:"Farkys", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:23, nickname:"SadoNarukami", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:24, nickname:"Zzoya", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:25, nickname:"Evernight", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:26, nickname:"90s Raya", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:27, nickname:"90s Cay", nama:"Ilham", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:28, nickname:"Danzen", nama:"Ren", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:29, nickname:"God-Serena", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:30, nickname:"dika95", nama:"Dika", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:31, nickname:"pemula", nama:"Gusron", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:32, nickname:"Arthenesian", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:33, nickname:"Manik", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:34, nickname:"OHNO", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:35, nickname:"Megidolaon", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:36, nickname:"ReskiSatir", nama:"Reski", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:37, nickname:"Michaa", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:38, nickname:"ZeroLogic", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:39, nickname:"Dyll", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:40, nickname:"Shaw", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:41, nickname:"Geon", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:42, nickname:"super", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:43, nickname:"MY.RYU", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:44, nickname:"tofu", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:45, nickname:"hasansirojun", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:46, nickname:"sandy", nama:"Irwandi", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:47, nickname:"Slasher", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:48, nickname:"eleanor", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:49, nickname:"90s Rebelz", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:50, nickname:"sandi", nama:"Irwandi", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:51, nickname:"B919", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:52, nickname:"Hecker", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:53, nickname:"tkgtty", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:54, nickname:"UKIYO", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:55, nickname:"Syu lv0", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:56, nickname:"Scrambled", nama:"Putra", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:57, nickname:"90s Prabowo", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"SENIOR MEMBER" },
+    { no:58, nickname:"Mr.iori", nama:"Aldi", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:59, nickname:"90s Ichimaru", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:60, nickname:"LA", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:61, nickname:"zrseent", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:62, nickname:"Neko", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:63, nickname:"KIKO", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:64, nickname:"YHWACH", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:65, nickname:"Player 00002", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:66, nickname:"Noctra", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:67, nickname:"[Y]", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:68, nickname:"BestSora", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:69, nickname:"Koryuu", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:70, nickname:"Aizu.san", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:71, nickname:"Rein", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:72, nickname:"Mengkreng", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:73, nickname:"Reumi", nama:"Trexi / Bii", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:74, nickname:"Leyy", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:75, nickname:"FizZ FuzZ", nama:"Hafis", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:76, nickname:"90s|Earl", nama:"Trexi / Bii", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:77, nickname:"Zenohhh", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:78, nickname:"RinV", nama:"Vinn", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:79, nickname:"mr.Newra", nama:"Aldi", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:80, nickname:"Raizen", nama:"Unknown", uid:"-", wa:"000 000 000 000", jabatan:"ACTIVE MEMBER" },
+    { no:81, nickname:"90s OrgBiasa", nama:"Andi", uid:"-", wa:"000 000 000 000", jabatan:"EX MEMBER" },
+    { no:82, nickname:"90s Suzune", nama:"Andi", uid:"-", wa:"000 000 000 000", jabatan:"EX MEMBER" },
+  ];
+
+  // ---- PARTY: atur nama party, nomor anggota, dan role-nya ----
+  const PARTIES = [
+    { name: "PARTY 1", members: [{ no: 3, role: "DPS" }, { no: 1, role: "SUB DPS" }, { no: 6, role: "PARRY" }] },
+    { name: "PARTY 2", members: [{ no: 7, role: "DPS" }, { no: 56, role: "SUB DPS" }, { no: 81, role: "PARRY" }] },
+    { name: "PARTY 3", members: [{ no: 28, role: "DPS" }, { no: 82, role: "SUB DPS" }, { no: 31, role: "PARRY" }] },
+    // Tinggal copas baris di atas buat nambah party baru
+  ];
+
+  /* =========================================================
+     LOGIKA — gak perlu diubah
+     ========================================================= */
+
+  // ---- tabs ----
+  document.querySelectorAll('.tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('main > section').forEach(s=>s.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.target).classList.add('active');
+    });
+  });
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---- INFO carousel ----
+  const carousel = document.getElementById('info-carousel');
+  const dotsWrap = document.getElementById('info-dots');
+  carousel.innerHTML = INFO_LIST.map(item => `
+    <div class="info-card">
+      <div class="info-icon">${item.icon || "📌"}</div>
+      <h3 class="pixel">${escapeHtml(item.title)}</h3>
+      <p>${escapeHtml(item.body)}</p>
+    </div>
+  `).join('');
+  dotsWrap.innerHTML = INFO_LIST.map((_, i) => `<button class="dot${i===0?' active':''}" data-i="${i}" aria-label="Info ${i+1}"></button>`).join('');
+
+  let infoIndex = 0;
+  function goToInfo(i){
+    infoIndex = Math.max(0, Math.min(INFO_LIST.length - 1, i));
+    carousel.scrollTo({ left: carousel.clientWidth * infoIndex, behavior: 'smooth' });
+    updateDots();
+  }
+  function updateDots(){
+    document.querySelectorAll('.dot').forEach((d, i)=> d.classList.toggle('active', i === infoIndex));
+  }
+  document.getElementById('info-prev').addEventListener('click', ()=> goToInfo(infoIndex - 1));
+  document.getElementById('info-next').addEventListener('click', ()=> goToInfo(infoIndex + 1));
+  dotsWrap.addEventListener('click', (e)=>{
+    const dot = e.target.closest('.dot');
+    if(dot) goToInfo(parseInt(dot.dataset.i, 10));
+  });
+  let scrollTimer;
+  carousel.addEventListener('scroll', ()=>{
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(()=>{
+      infoIndex = Math.round(carousel.scrollLeft / carousel.clientWidth);
+      updateDots();
+    }, 100);
+  });
+
+  // ---- ANGGOTA table ----
+  const badgeClass = {
+    "CAPTAIN":"captain", "WAKIL CAPTAIN":"wakil", "SENIOR MEMBER":"senior", "ACTIVE MEMBER":"member", "EX MEMBER":"new"
+  };
+  const rosterBody = document.getElementById('roster-body');
+  const rosterCount = document.getElementById('roster-count');
+  const rosterSearch = document.getElementById('roster-search');
+
+  function renderRoster(filter){
+    const f = (filter || '').trim().toLowerCase();
+    const rows = MEMBERS.filter(m =>
+      !f || m.nickname.toLowerCase().includes(f) || m.nama.toLowerCase().includes(f) || m.jabatan.toLowerCase().includes(f)
+    );
+    rosterBody.innerHTML = rows.length ? rows.map(m => `
+      <tr>
+        <td>${m.no}</td>
+        <td class="nick">${escapeHtml(m.nickname)}</td>
+        <td>${escapeHtml(m.nama)}</td>
+        <td>${escapeHtml(m.uid)}</td>
+        <td>${escapeHtml(m.wa)}</td>
+        <td><span class="badge ${badgeClass[m.jabatan] || 'member'}">${escapeHtml(m.jabatan)}</span></td>
+      </tr>
+    `).join('') : `<tr><td colspan="6"><div class="empty">Gak ada anggota yang cocok.</div></td></tr>`;
+    rosterCount.textContent = `TOTAL: ${MEMBERS.length} ANGGOTA` + (f ? ` — ${rows.length} DITEMUKAN` : '');
+  }
+  rosterSearch.addEventListener('input', ()=> renderRoster(rosterSearch.value));
+  renderRoster('');
+
+  // ---- PARTY (dari PARTIES, lookup by nomor anggota + role) ----
+  const membersByNo = {};
+  MEMBERS.forEach(m => { membersByNo[m.no] = m; });
+
+  const roleBadgeClass = {
+    "DPS": "dps",
+    "SUB DPS": "subdps",
+    "PARRY": "parry"
+  };
+
+  const partyGrid = document.getElementById('party-grid');
+  let partyHtml = '';
+
+  PARTIES.forEach(party => {
+    const partyMembers = party.members.map(pm => {
+      const memberData = membersByNo[pm.no];
+      return memberData ? { ...memberData, role: pm.role || "MEMBER" } : null;
+    }).filter(Boolean);
+
+    const missing = party.members.filter(pm => !membersByNo[pm.no]);
+    const incomplete = partyMembers.length < 3;
+
+    partyHtml += `
+      <div class="party-card${incomplete ? ' incomplete' : ''}">
+        <h4>${escapeHtml(party.name)}${incomplete ? ' (BELUM GENAP)' : ''}</h4>
+        ${partyMembers.map(m => `
+          <div class="party-member">
+            <span class="pnick">${escapeHtml(m.nickname)}</span>
+            <span class="badge ${roleBadgeClass[m.role] || 'member'}">${escapeHtml(m.role)}</span>
+          </div>
+        `).join('')}
+        ${missing.length ? `<div class="party-member"><span class="pnick" style="color:var(--muted)">NO ${missing.map(m => m.no).join(', ')} gak ketemu</span></div>` : ''}
+      </div>
+    `;
+  });
+
+  partyGrid.innerHTML = partyHtml || '<div class="empty">Belum ada party. Tambahin di array PARTIES pada script.</div>';
+
+})();
+</script>
+
+</body>
+</html>
